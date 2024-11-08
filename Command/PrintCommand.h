@@ -2,7 +2,8 @@
 #include "ICommand.h"
 #include "../TypedefRepo.h"
 
-class PrintCommand : public ICommand {
+class PrintCommand : public ICommand
+{
 public:
     PrintCommand(int pid, String& toPrint);
 

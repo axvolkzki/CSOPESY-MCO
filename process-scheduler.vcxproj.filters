@@ -63,13 +63,22 @@
     <ClCompile Include="Scheduler\ResourceEmulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MessageBuffer.cpp">
+    <ClCompile Include="Console\MessageBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Event\KeyboardEventHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Event\IKeyboardEvent.cpp">
+    <ClCompile Include="Memory\FlatMemoryAllocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory\MemoryTestRun.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scheduler\DebugScheduler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory\MemoryManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -122,13 +131,28 @@
     <ClInclude Include="Scheduler\ResourceEmulator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MessageBuffer.h">
+    <ClInclude Include="Console\MessageBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Event\IKeyboardEvent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Event\KeyboardEventHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\FlatMemoryAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\IMemoryAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\MemoryTestRun.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scheduler\DebugScheduler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\MemoryManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

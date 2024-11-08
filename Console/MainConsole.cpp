@@ -13,9 +13,15 @@
 #include "../Process/Process.h"
 #include "../Event/KeyboardEventHandler.h"
 #include "../Scheduler/GlobalScheduler.h"
+#include "../Threading/SchedulerWorker.h"
+
+std::atomic<bool> isSchedulerStop{false};  // Atomic flag to control stopping the scheduler
+SchedulerWorker schedulerWorker;           // Instance of SchedulerWorker
+std::thread schedulerThread;               // Thread to run the scheduler worker
 
 
-GlobalConfig globalConfig;
+// GlobalConfig globalConfig;
+GlobalConfig& config = GlobalConfig::getInstance();
 
 
 // Constructor: Set the name of the console when MainConsole is instantiated
@@ -52,21 +58,9 @@ void MainConsole::process() {
 			else {
 				if (commandMain == "initialize") {
 					std::cout << "Initializing the program...\n" << std::endl;
-					String filename = "config.txt";
-
-					// Load the config file
-					if (globalConfig.loadConfigFile(filename)) {
-						std::cout << "Config file loaded successfully.\n" << std::endl;
-						globalConfig.printConfig();
-						std::cout << "______________________________________________________________\n";
-						std::cout << " " << std::endl;
-
-						isFirstCommand = false;
-					}
-					else {
-						std::cerr << "Error: Could not load the config file. Please check the file.\n" << std::endl;
-						exit(1);
-					}
+					
+					config.printConfig();
+					isFirstCommand = false;
 					
 					continue;
 				}
@@ -109,7 +103,7 @@ void MainConsole::process() {
 				onEnabled();
 			}
 			else if (commandMain.substr(0, 9) == "screen -s" && commandMain.length() > 9) {			// ensure there is process name
-				// Check if the process name is already in the console table
+
 				if (ConsoleManager::getInstance()->isScreenRegistered(commandMain.substr(10))) {
 					std::cerr << "Error: Process name " << commandMain.substr(10) << " already exists. Please use another name." << std::endl;
 					continue;
@@ -118,13 +112,9 @@ void MainConsole::process() {
 				ConsoleManager::getInstance()->exitApplication();									// Stop the main console process
 				
 				String processName = commandMain.substr(10, commandMain.length() - 10);				// get the process name
-				int processID = ++processCounter;												// Increment the process counter
-				Process::RequirementFlags processReqFlags = { true, 1, true, 1 };		// Set the requirement flags
+				int processID = ++processCounter;													// Increment the process counter
+				Process::RequirementFlags processReqFlags = { true, 1, true, 1 };					// Set the requirement flags
 
-
-				// Create a new process and attach it to a new screen
-				//std::shared_ptr<Process> newProcess = std::make_shared<Process>(processID, processName, processReqFlags);	// Create a new process
-				//std::shared_ptr<BaseScreen> newScreen = std::make_shared<BaseScreen>(newProcess, processName);	// Create a new screen
 				std::shared_ptr<Process> newProcess = GlobalScheduler::getInstance()->createUniqueProcess(processName);
 				std::shared_ptr<BaseScreen> newScreen = std::make_shared<BaseScreen>(newProcess, newProcess->getName());
 				
@@ -161,63 +151,122 @@ void MainConsole::process() {
 				std::cout << "______________________________________________________________\n";
 
 			}
+			/*
 			else if (commandMain == "scheduler-test") {
+				isSchedulerStop = false;            // Reset stop flag
+
+				schedulerWorker.update(true);       // Tell the worker to start processing
+				schedulerThread = std::thread(&SchedulerWorker::run, &schedulerWorker);  // Launch in a new thread
+
+				std::cout << "Scheduler started and is running in the background.\n";
 				std::cout << "Testing the scheduler...\n";
-				std::cout << "Generating a batch of dummy processes...\n" << std::endl;
+				std::cout << "Generating a batch of processes...\n" << std::endl;
 
-				globalConfig.printConfig();
+				config.printConfig();
+				std::cout << " " << std::endl;
 
-				uint32_t batchProcessFreq = globalConfig.getBatchProcessFreq();	
-				/*std::cout << "Batch Process Frequency: " << batchProcessFreq << std::endl;
-				std::cout << globalConfig.getBatchProcessFreq() << std::endl;*/
-				
-				// Get the total number of processes
-				uint32_t totalProcesses = ConsoleManager::getInstance()->getTotalScreens();
-				// Debugger
-				/*std::cout << "Total number of processes: " << totalProcesses << std::endl;*/
+				uint32_t batchProcessFreq = config.getBatchProcessFreq();	
+				std::cout << "Batch Process Frequency: " << batchProcessFreq << std::endl;
 
 				// CPU Cycle Counter
 				int cpuCycleCounter = 0;
 
-				KeyboardEventHandler KeyboardEventHandler;
+				KeyboardEventHandler keyboardEventHandler;
 
-				
+				// Continuously generate processes until it was stopped by the command "scheduler-stop" 
+				while (!keyboardEventHandler.getIsSchedulerStop()) {
+					// Poll keyboard input for interrupts
+					ConsoleManager::getInstance()->PollKeyboardInput(keyboardEventHandler);
 
-				// Continuously generate processes until it was stopped by the command "scheduler-stop" or when a new process is created
-				while (isSchedulerStop == false) {
-					ConsoleManager::getInstance()->PollKeyboardInput(KeyboardEventHandler);
+					// If paused, wait for user input
+					if (keyboardEventHandler.isPaused()) {
+						std::cout << "Scheduler waiting for user input..." << std::endl;
+						while (keyboardEventHandler.isPaused() && !keyboardEventHandler.getIsSchedulerStop()) {
+							ConsoleManager::getInstance()->PollKeyboardInput(keyboardEventHandler);
+							std::this_thread::sleep_for(std::chrono::milliseconds(100));
+						}
+						keyboardEventHandler.resumeScheduler();  // Resume once input is processed
+					}
 
+					// Process generation
 					if (batchProcessFreq != 0 && cpuCycleCounter % batchProcessFreq == 0) {
-						// Process name
 						String processName = "Process" + std::to_string(++processCounter);
-						// Create a new process
-						std::shared_ptr<Process> newProcess = GlobalScheduler::getInstance()->createUniqueProcess(processName);
-						std::shared_ptr<BaseScreen> newScreen = std::make_shared<BaseScreen>(newProcess, newProcess->getName());
-						ConsoleManager::getInstance()->registerScreen(newScreen);
-						//ConsoleManager::getInstance()->switchToScreen(newProcess->getName());
-						/*ConsoleManager::getInstance()->process();*/
-						//ConsoleManager::getInstance()->drawConsole();
-					}
-					else if (batchProcessFreq == 0) {
+						try {
+							std::shared_ptr<Process> newProcess = GlobalScheduler::getInstance()->createUniqueProcess(processName);
+							std::shared_ptr<BaseScreen> newScreen = std::make_shared<BaseScreen>(newProcess, newProcess->getName());
+							ConsoleManager::getInstance()->registerScreen(newScreen);
+						} catch (const std::exception& e) {
+							std::cerr << "Error creating process: " << e.what() << std::endl;
+						}
+					} else if (batchProcessFreq == 0) {
 						std::cerr << "Error: batchProcessFreq is zero." << std::endl;
-						// Handle the error appropriately
+						break;
 					}
+
 					cpuCycleCounter++;
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Prevent CPU overuse
 				}
 
 				// Print the number of processes generated
 				std::cout << "Total number of processes generated: " << ConsoleManager::getInstance()->getTotalScreens() << std::endl;
+			}
+			*/
+			else if (commandMain == "scheduler-test") {
+				if (schedulerThread.joinable()) {
+					std::cout << "Scheduler is already running.\n";
+					return;
+				}
 
-				// Add a small sleep to prevent CPU overuse
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				isSchedulerStop = false;            // Reset stop flag
+				schedulerWorker.update(true);       // Tell the worker to start processing
+				schedulerThread = std::thread(&SchedulerWorker::run, &schedulerWorker);  // Launch in a new thread
+
+				std::cout << "Scheduler started and is running in the background.\n";
+
+				// Process creation loop in the background
+				uint32_t batchProcessFreq = config.getBatchProcessFreq();
+				int cpuCycleCounter = 0;
+
+				while (!isSchedulerStop) {
+					if (batchProcessFreq != 0 && cpuCycleCounter % batchProcessFreq == 0) {
+						// Generate a new process
+						String processName = "Process" + std::to_string(++processCounter);
+
+						try {
+							std::shared_ptr<Process> newProcess = GlobalScheduler::getInstance()->createUniqueProcess(processName);
+							std::shared_ptr<BaseScreen> newScreen = std::make_shared<BaseScreen>(newProcess, newProcess->getName());
+							ConsoleManager::getInstance()->registerScreen(newScreen);
+							
+							// std::cout << "Created new process: " << processName << std::endl;
+						} catch (const std::exception& e) {
+							std::cerr << "Error creating process: " << e.what() << std::endl;
+						}
+					}
+
+					cpuCycleCounter++;
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Frequency of process generation
+				}
+
+				// Stop the scheduler worker if the loop is exited
+				if (schedulerThread.joinable()) {
+					schedulerWorker.update(false);  // Tell worker to stop
+					schedulerThread.join();
+				}
+				
+				std::cout << "Scheduler has stopped generating processes.\n";
 			}
 			else if (commandMain == "scheduler-stop") {
 				if (isSchedulerStop) {
-					std::cout << "No generating processes.\n" << std::endl;
-				}
-				else {
-					std::cout << "Stopping the scheduler...\n" << std::endl;
-					isSchedulerStop = true;
+					std::cout << "Scheduler is already stopped.\n";
+				} else {
+					isSchedulerStop = true;            // Set the stop flag
+					schedulerWorker.update(false);     // Tell the worker to stop
+
+					if (schedulerThread.joinable()) {
+						schedulerThread.join();        // Wait for the thread to finish
+					}
+
+					std::cout << "Scheduler has been stopped.\n";
 				}
 			}
 			else if (commandMain == "report-util") {

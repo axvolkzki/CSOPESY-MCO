@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "../Config/GlobalConfig.h"
 #include "AScheduler.h"
 #include "FCFSScheduler.h" // You'll need to create this
 #include "RoundRobinScheduler.h" // You'll need to create this
@@ -15,7 +16,7 @@ public:
 
     static void initialize(AScheduler::SchedulingAlgorithm algo = AScheduler::FCFS);
     static void destroy();
-    void tick();
+    void tick() const;
 
     std::shared_ptr<Process> createUniqueProcess(String name);
     AScheduler::SchedulingAlgorithm getCurrentAlgorithm() const { return currentAlgo; }

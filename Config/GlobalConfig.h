@@ -1,13 +1,24 @@
 #pragma once
 #include "../TypedefRepo.h"
 #include <cstdint>
+#include <mutex>
 
 class GlobalConfig
 {
 public:
-	GlobalConfig();
-	~GlobalConfig();
+	// Deleted copy constructor and assignment operator to prevent copying
+    GlobalConfig(const GlobalConfig&) = delete;
+    GlobalConfig& operator=(const GlobalConfig&) = delete;
 
+	GlobalConfig();						// Constructor
+	~GlobalConfig() = default;
+
+	static GlobalConfig& getInstance() {
+		static GlobalConfig instance;
+		return instance;
+	}
+
+	void initialize();
 	bool loadConfigFile(String& filename);				// Loads the config file
 	void printConfig() const;							// Prints the config
 	int getRandomInstructionCount() const;				// Returns a random instruction count
@@ -20,6 +31,9 @@ public:
 	uint32_t getMinIns() const;							// Returns the minimum instructions
 	uint32_t getMaxIns() const;							// Returns the maximum instructions
 	uint32_t getDelaysPerExec() const;					// Returns the delays per execution
+	uint32_t getMaxOverallMem() const;					// Returns the maximum overall memory
+	uint32_t getMemPerFrame() const;					// Returns the memory per frame
+	uint32_t getMemPerProcess() const;					// Returns the memory per process
 
 private:
 	struct Config {							// Struct variable to hold the values of the config.txt
@@ -30,6 +44,9 @@ private:
 		uint32_t min_ins;					// Minimum instructions: [1, 2^32]
 		uint32_t max_ins;					// Maximum instructions: [1, 2^32]
 		uint32_t delays_per_exec;			// Delays per execution: [0, 2^32]
+		uint32_t max_overall_mem;			// Maximum overall memory: [1, 2^32]
+		uint32_t mem_per_frame;				// Memory per frame: [1, 2^32]
+		uint32_t mem_per_process;			// Memory per process: [1, 2^32]
 	};
 
 	Config config;										// Config variable

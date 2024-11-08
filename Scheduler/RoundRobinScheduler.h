@@ -16,5 +16,5 @@ public:
 private:
 	int timeQuantum;
 	int currentCycle = 0;
-	std::queue<std::shared_ptr<Process>> processQueue;
+	std::queue<std::shared_ptr<Process>> processReadyQueue;
 };

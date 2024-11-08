@@ -128,9 +128,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Memory\MemoryManager.cpp" />
+    <ClCompile Include="Scheduler\DebugScheduler.cpp" />
     <ClCompile Include="Event\KeyboardEventHandler.cpp" />
-    <ClCompile Include="Event\IKeyboardEvent.cpp" />
-    <ClCompile Include="MessageBuffer.cpp" />
+    <ClCompile Include="Memory\MemoryTestRun.cpp" />
+    <ClCompile Include="Memory\FlatMemoryAllocator.cpp" />
+    <ClCompile Include="Console\MessageBuffer.cpp" />
     <ClCompile Include="Scheduler\ResourceEmulator.cpp" />
     <ClCompile Include="Scheduler\RoundRobinScheduler.cpp" />
     <ClCompile Include="Scheduler\FCFSScheduler.cpp" />
@@ -149,9 +152,14 @@
     <ClCompile Include="Process\Process.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Memory\MemoryManager.h" />
+    <ClInclude Include="Scheduler\DebugScheduler.h" />
     <ClInclude Include="Event\IKeyboardEvent.h" />
     <ClInclude Include="Event\KeyboardEventHandler.h" />
-    <ClInclude Include="MessageBuffer.h" />
+    <ClInclude Include="Memory\MemoryTestRun.h" />
+    <ClInclude Include="Memory\FlatMemoryAllocator.h" />
+    <ClInclude Include="Memory\IMemoryAllocator.h" />
+    <ClInclude Include="Console\MessageBuffer.h" />
     <ClInclude Include="Scheduler\ResourceEmulator.h" />
     <ClInclude Include="Scheduler\RoundRobinScheduler.h" />
     <ClInclude Include="Scheduler\FCFSScheduler.h" />

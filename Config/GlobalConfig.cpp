@@ -15,12 +15,41 @@ GlobalConfig::GlobalConfig() {
 	config.min_ins = 0;
 	config.max_ins = 0;
 	config.delays_per_exec = 0;
+	config.max_overall_mem = 0;
+	config.mem_per_frame = 0;
+	config.mem_per_process = 0;
 }
 
 
-GlobalConfig::~GlobalConfig() {
+void GlobalConfig::initialize() {
+	// Load the configuration file
+    String config_file = "config.txt";
+
+    if (loadConfigFile(config_file)) {
+        std::cout << "Config file loaded successfully.\n" << std::endl;
+    } else {
+        std::cout << "Failed to load config file.\n" << std::endl;
+    }
 }
 
+/*
+void GlobalConfig::initialize() {
+    // Load the configuration file
+    String config_file = "config.txt";
+
+    if (loadConfigFile(config_file)) {
+        std::cout << "Config file loaded successfully.\n" << std::endl;
+        // Optionally validate the loaded configuration
+        if (!validateConfig()) {
+            std::cout << "Warning: Configuration validation failed. Using default values.\n" << std::endl;
+            setDefaultConfigValues(); // Set default values if validation fails
+        }
+    } else {
+        std::cout << "Failed to load config file. Using default values.\n" << std::endl;
+        setDefaultConfigValues(); // Set default values if loading fails
+    }
+}
+*/
 
 
 bool GlobalConfig::loadConfigFile(String& filename) {
@@ -139,6 +168,36 @@ bool GlobalConfig::parseConfigFile(String& line) {
 				throw std::invalid_argument("Invalid delay-per-exec value");
 			}
 		}
+		else if (key == "max-overall-mem") {
+			uint32_t value;
+			if (iss >> value) {
+				config.max_overall_mem = value;
+				isParsed = true;
+			}
+			else {
+				throw std::invalid_argument("Invalid max-overall-mem value");
+			}
+		}
+		else if (key == "mem-per-frame") {
+			uint32_t value;
+			if (iss >> value) {
+				config.mem_per_frame = value;
+				isParsed = true;
+			}
+			else {
+				throw std::invalid_argument("Invalid mem-per-frame value");
+			}
+		}
+		else if (key == "mem-per-proc") {
+			uint32_t value;
+			if (iss >> value) {
+				config.mem_per_process = value;
+				isParsed = true;
+			}
+			else {
+				throw std::invalid_argument("Invalid mem-per-process value");
+			}
+		}
 		else {
 			throw std::invalid_argument("Unknown configuration key: " + key);
 		}
@@ -160,6 +219,9 @@ void GlobalConfig::printConfig() const {
 	std::cout << "Min Instructions: " << config.min_ins << std::endl;
 	std::cout << "Max Instructions: " << config.max_ins << std::endl;
 	std::cout << "Delays per Execution: " << config.delays_per_exec << std::endl;
+	std::cout << "Max Overall Memory: " << config.max_overall_mem << std::endl;
+	std::cout << "Memory per Frame: " << config.mem_per_frame << std::endl;
+	std::cout << "Memory per Process: " << config.mem_per_process << std::endl;
 }
 
 int GlobalConfig::getRandomInstructionCount() const
@@ -212,6 +274,21 @@ uint32_t GlobalConfig::getMaxIns() const
 uint32_t GlobalConfig::getDelaysPerExec() const
 {
 	return config.delays_per_exec;
+}
+
+uint32_t GlobalConfig::getMaxOverallMem() const
+{
+	return config.max_overall_mem;
+}
+
+uint32_t GlobalConfig::getMemPerFrame() const
+{
+	return config.mem_per_frame;
+}
+
+uint32_t GlobalConfig::getMemPerProcess() const
+{
+	return config.mem_per_process;
 }
 
 

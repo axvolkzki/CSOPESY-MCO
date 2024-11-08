@@ -18,6 +18,8 @@ public:
 	// Overridden functions
 	virtual void execute() = 0;
 
+	virtual ~ICommand() = default;
+
 
 protected:
 	int pid;

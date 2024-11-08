@@ -39,7 +39,8 @@ public:
 	ProcessState getState() const;
 	String getName() const;
 
-	void test_generateRandomCommands(int limit);
+	// void test_generateRandomCommands(int limit);
+	void generateRandomCommands();
 
 private:
 	int pid;

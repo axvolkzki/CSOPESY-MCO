@@ -1,50 +1,52 @@
 #include "RoundRobinScheduler.h"
+#include "../Config/GlobalConfig.h"
+#include "../Console/ConsoleManager.h"
 
 void RoundRobinScheduler::init()
 {
 	// Initialize the process queue
-	processQueue = std::queue<std::shared_ptr<Process>>();
+	processReadyQueue = std::queue<std::shared_ptr<Process>>();
 
-	// Clear the process queue
-	while (!processQueue.empty())
-	{
-		processQueue.pop();
-	}
-
+	// Get the time quantum from the configuration
+	GlobalConfig& config = GlobalConfig::getInstance();
+	timeQuantum = config.getQuantumCycles();
 	currentCycle = 0;
 }
 
 void RoundRobinScheduler::execute()
 {
-	// Check if there are processes in the queue
-	if (!processQueue.empty())
-	{
-		auto currentProcess = processQueue.front();
+    // Add processes from AScheduler's processMap to the ready queue
+    for (auto& entry : processMap) {
+        processReadyQueue.push(entry.second);  // Add process to the ready queue
+    }
 
-		if (currentProcess->isFinished()) {
-			processQueue.pop();
-		}
-		else {
-			if (currentCycle < timeQuantum) {
-				currentProcess->executeCurrentCommand();
-				currentProcess->moveToNextLine();
-				currentCycle++;
-			}
-			else {
-				// Time slice expired, move to the next process
-				processQueue.pop();
-				processQueue.push(currentProcess);
-				/*processQueue.pop();*/
-				currentCycle = 0;
-				
-			}
-		}
+    if (!processReadyQueue.empty()) {
+        auto currentProcess = processReadyQueue.front(); // Get the next process
 
-		/*currentCycle++;
-		if (currentCycle >= timeQuantum) {
-			currentCycle = 0;
-			processQueue.push(currentProcess);
-			processQueue.pop();
-		}*/
-	}
+        // Execute the current command of the process
+        currentProcess->executeCurrentCommand();
+        currentProcess->moveToNextLine();
+
+        // Increment cycle count and check if time quantum is finished
+        if (currentCycle >= timeQuantum) {
+            processReadyQueue.push(processReadyQueue.front());  // Move process to the back
+            processReadyQueue.pop();                            // Remove it from the front
+            currentCycle = 0;                                   // Reset cycle for the next process
+        } else {
+            currentCycle++; // Increment cycle for current process
+        }
+
+        // If the process is finished, pop it from the queue
+        if (currentProcess->isFinished()) {
+            processReadyQueue.pop(); // Remove finished process
+            currentCycle = 0;        // Reset cycle for the next process
+
+            // Find the process and set its status to finished
+            auto it = processMap.find(currentProcess->getName());
+            
+            // if (it != processMap.end()) {
+            //     it->second->currentState = Process::FINISHED;
+            // }
+        }
+    }
 }

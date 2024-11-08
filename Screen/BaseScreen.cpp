@@ -5,6 +5,7 @@
 #include "../TypedefRepo.h"
 #include "../Process/Process.h"
 #include "../Console/ConsoleManager.h"
+#include "../Threading/SchedulerWorker.h"
 
 
 
@@ -35,32 +36,29 @@ void BaseScreen::display() {
 
 void BaseScreen::process() {
 	String commandBaseScreen;
-    
-	while (true) {
-		std::cout << "\nEnter a command: ";
-		std::getline(std::cin, commandBaseScreen);
-		std::cout << "\n";
+	
+	// Start SchedulerWorker for this screen's process
+    SchedulerWorker schedulerWorker;
+    schedulerWorker.update(true);
+    std::thread schedulerThread(&SchedulerWorker::run, &schedulerWorker);
+    schedulerThread.detach();  // Detach thread to run independently
 
-		// Increment the current line of code for every tick
+	// Command input loop for user
+    while (true) {
+        std::cout << "\nEnter a command: ";
+        std::getline(std::cin, commandBaseScreen);
 
-		if (commandBaseScreen == "exit") {
-			ConsoleManager::getInstance()->exitApplication();			// Exit the application
-			ConsoleManager::getInstance()->switchConsole(MAIN_CONSOLE);  // Exit to the previous console
-			break;
-		}
-		else if (commandBaseScreen == "process-smi") {
-			if (!attachedProcess->isFinished()) {
-				attachedProcess->executeCurrentCommand();
-				attachedProcess->moveToNextLine();
-			}
-			
-			display();
+        if (commandBaseScreen == "exit") {
+            schedulerWorker.update(false); // Stop the scheduler worker
+            ConsoleManager::getInstance()->switchConsole(MAIN_CONSOLE);
+            break;
+        } else if (commandBaseScreen == "process-smi") {
+            display();  // Display process information
+        } else {
+            std::cout << "Command not recognized. Please try again." << std::endl;
+        }
+    }
 
-		}
-		else {
-			std::cout << "Command not recognized. Please try again." << std::endl;
-		}
-	}
 }
 
 void BaseScreen::displayProcessInfo() {

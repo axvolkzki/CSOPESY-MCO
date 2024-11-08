@@ -1,5 +1,4 @@
 #include "GlobalScheduler.h"
-#include "../Config/GlobalConfig.h"
 
 GlobalScheduler* GlobalScheduler::sharedInstance = nullptr;
 
@@ -37,19 +36,15 @@ void GlobalScheduler::createScheduler(AScheduler::SchedulingAlgorithm algo) {
 }
 
 void GlobalScheduler::initialize(AScheduler::SchedulingAlgorithm algo) {
-	if (sharedInstance == nullptr) {
-		sharedInstance = new GlobalScheduler();
-		/*sharedInstance->createScheduler(algo);*/
-	}
+	sharedInstance = new GlobalScheduler();
 }
 
 void GlobalScheduler::destroy()
 {
 	delete sharedInstance;
-	sharedInstance = nullptr;
 }
 
-void GlobalScheduler::tick()
+void GlobalScheduler::tick() const
 {
 	this->scheduler->execute();
 }
@@ -67,13 +62,18 @@ std::shared_ptr<Process> GlobalScheduler::createUniqueProcess(String name)
 		return existingProcess;
 	}
 	else {
+		// Process::RequirementFlags reqFlags = { ProcessRequirementFlags_CONFIG::REQUIRE_FILES, ProcessRequirementFlags_CONFIG:: NUM_FILES,
+		// ProcessRequirementFlags_CONFIG::REQUIRE_MEMORY, ProcessRequirementFlags_CONFIG::MEMORY_REQUIRED };
+
+		// Temporary to run the scheduler
 		Process::RequirementFlags reqFlags = { true, 1, true, 1 };
 
 		if (name == "") {
 			name = this->generateProcessName();
 		}
 		std::shared_ptr<Process> newProcess = std::make_shared<Process>(this->pidCounter, name, reqFlags);
-		newProcess->test_generateRandomCommands(10);
+		// newProcess->test_generateRandomCommands(10);
+		newProcess->generateRandomCommands();
 
 		// put new process to ready queue
 		this->scheduler->addProcess(newProcess);
@@ -84,9 +84,9 @@ std::shared_ptr<Process> GlobalScheduler::createUniqueProcess(String name)
 
 }
 
-std::shared_ptr<Process> GlobalScheduler::findProcess(String processName)
+std::shared_ptr<Process> GlobalScheduler::findProcess(String name)
 {
-	return this->scheduler->findProcess(processName);
+	return this->scheduler->findProcess(name);
 }
 
 String GlobalScheduler::generateProcessName()

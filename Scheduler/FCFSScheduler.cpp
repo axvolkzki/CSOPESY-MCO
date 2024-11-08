@@ -15,25 +15,14 @@ void FCFSScheduler::init()
 
 void FCFSScheduler::execute()
 {
-	// Check if there are processes in the queue
-	if (!processQueue.empty())
-	{
-		auto currentProcess = processQueue.front();
+	if (processQueue.empty()) return;  // Check if queue is empty
+    
+    auto currentProcess = processQueue.front();
 
-		if (currentProcess->isFinished()) {
-			processQueue.pop();
-		}
-		else {
-			currentProcess->executeCurrentCommand();
-			currentProcess->moveToNextLine();
-		}
-
-
-		//// Get the first process in the queue
-		//std::shared_ptr<Process> process = processQueue.front();
-		//// Remove the process from the queue
-		//processQueue.pop();
-		//// Execute the process
-		//process->execute();
-	}
+    if (currentProcess->isFinished()) {
+        processQueue.pop();  // Remove the process if it's finished
+    } else {
+        currentProcess->executeCurrentCommand();
+        currentProcess->moveToNextLine();
+    }
 }
