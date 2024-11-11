@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <sstream>
 #include <unordered_map>
 
@@ -6,41 +7,48 @@
 #include "../Process/Process.h"
 #include "../TypedefRepo.h"
 
-static const String FCFS_SCHEDULER_NAME = "FCFSScheduler";
-static const String ROUND_ROBIN_SCHEDULER_NAME = "RoundRobinScheduler";
+//
+static const String FCFS_SCHEDULER_NAME = "FCFSScheduler"; // FCFS scheduler name
+static const String RR_SCHEDULER_NAME = "RRScheduler";     // RR scheduler name
+//
 
 class AScheduler : public IETThread
 {
 public:
-    enum SchedulingAlgorithm {
-        FCFS,
-        ROUND_ROBIN
-    };
+    enum SchedulingAlgorithm
+    { 
+        fcfs, 
+        rr 
+    };  // Enum for different scheduling algorithms
 
     AScheduler(SchedulingAlgorithm schedulingAlgo, int pid, String processName);
 
-	void addProcess(std::shared_ptr<Process> process);
-	std::shared_ptr<Process> findProcess(String processName);
-	void run() override;
-    void stop();
+    void addProcess(std::shared_ptr<Process> process); // Adds process
+    std::shared_ptr<Process> findProcess(String processName);
+    void run() override;
+    void stop(); // Stops the scheduler
 
-    virtual void init() = 0;
-    virtual void execute() = 0;
+	// get process map
+	std::unordered_map<String, std::shared_ptr<Process>> getProcessMap() const { return processMap; }
 
-	struct ProcessInfo {
-		int pid;
-		String name;
+    // Common virtual methods to be implemented by derived classes
+    virtual void init() = 0;     // Initializes the scheduler (virtual)
+    virtual void execute() = 0;  // Executes the scheduler logic (virtual)
+
+    struct ProcessInfo
+    {
+        int pid;
+        String name;
         int cpuID;
         int lineCounter;
-        int lineOfCode;
+        int linesOfCode;
         int remainingTime;
-	};
+    };
 
 protected:
-	SchedulingAlgorithm schedulingAlgo;
-	int pid;
-	String processName;
-	std::unordered_map<String, std::shared_ptr<Process>> processMap;
-	bool running = true;
+    SchedulingAlgorithm algorithm;       // Scheduling algorithm type (e.g., FCFS, RR)
+	ProcessInfo currentProcessInfo;      // Current process info
+	std::unordered_map<String, std::shared_ptr<Process>> processMap; // Map to store processes
+	bool isRunning = true;              // Flag to indicate if the scheduler is running
 };
 

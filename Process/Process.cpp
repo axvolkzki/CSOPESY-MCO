@@ -24,6 +24,7 @@ Process::Process(int pid, String name, RequirementFlags requirementFlags)
 
 void Process::addCommand(ICommand::CommandType commandType)
 {
+
 	if (commandType == ICommand::IO) {
 		// TODO: Implement I/O command handling
 
@@ -43,18 +44,7 @@ void Process::addCommand(ICommand::CommandType commandType)
 // void Process::test_generateRandomCommands(int limit)
 void Process::generateRandomCommands()
 {
-	// Get the instance of GlobalConfig
-	GlobalConfig& config = GlobalConfig::getInstance();
-
-	// max and minimum
-	int min = config.getMinIns();
-	int max = config.getMaxIns();
-
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> dis(min, max);
-
-	int limit = dis(gen);
+	int limit = GlobalConfig::getInstance()->getRandomInstructionCount();
 
 	for (int i = 0; i < limit; i++) {
 		addCommand(ICommand::PRINT);
@@ -62,47 +52,55 @@ void Process::generateRandomCommands()
 	
 
 
-	// for (int i = 0; i < limit; i++)
-	// {
-	// 	auto commandType = static_cast<ICommand::CommandType>(dis(gen));
+	//int limit = GlobalConfig::getInstance()->getRandomInstructionCount();
+	//std::random_device rd;
+	//std::mt19937 gen(rd());
+	//std::uniform_int_distribution<> dis(0, 1);  // Assuming 0: PRINT, 1: IO (you can extend this)
 
-	// 	if (commandType == ICommand::IO) {
-	// 		// TODO: Implement I/O command handling
-
-	// 	}
-	// 	else if (commandType == ICommand::PRINT) {
-	// 		String toPrint = "Hello, World!";
-	// 		const std::shared_ptr<ICommand> print = std::make_shared<PrintCommand>(this->pid, toPrint);
-	// 		this->commandList.push_back(print);
-	// 	}
-
-	// 	// String toPrint = "This is a sample print.";
-	// 	// const std::shared_ptr<ICommand> print = std::make_shared<PrintCommand>(this->pid, toPrint);
-	// 	// this->commandList.push_back(print);
-	// }
+	//for (int i = 0; i < limit; i++) {
+	//	auto commandType = static_cast<ICommand::CommandType>(dis(gen));
+	//	addCommand(commandType);
+	//}
 }
+
+//void Process::updateState()
+//{
+//	if (this->getRemainingTime() < this->getLinesOfCode()) {
+//		this->currentState(RUNNING);
+//	}
+//	else {
+//
+//	}
+//}
 
 void Process::executeCurrentCommand() const
 {
-	commandList[commandCounter]->execute(); // Executes the command
-    std::cout << "Executing command at index " << commandCounter << std::endl; // Debug output
-	// this->commandList[this->commandCounter]->execute();
-	// if (commandCounter < commandList.size()) {
-    //     commandList[commandCounter]->execute();
-    // } else {
-    //     std::cerr << "No command to execute at index " << commandCounter << std::endl;
-    // }
+	if (commandCounter < commandList.size()) {
+		commandList[commandCounter]->execute(); // Executes the command
+		std::cout << "Executing command at index " << commandCounter << std::endl; // Debug output
+	}
+	else {
+		std::cerr << "No command to execute at index " << commandCounter << std::endl;
+	}
 }
 
 void Process::moveToNextLine()
 {
-	// if (commandCounter < commandList.size()) {
-    //     commandCounter++;
-    // }
+	std::lock_guard<std::mutex> lock(processMutex);
 
-	this->commandCounter++;
-	std::cout << "Moved to next command, counter: " << commandCounter << std::endl; // Debug output
+	if (commandCounter < commandList.size()) {
+		this->commandCounter++;
+		std::cout << "Moved to next command, counter: " << commandCounter << std::endl; // Debug output
+	}
+	else {
+		std::cout << "All commands executed, cannot move to next line." << std::endl;
+	}
 
+}
+
+void Process::updateState(const ProcessState newState) {
+	std::lock_guard<std::mutex> lock(processMutex);
+	this->currentState = newState;
 }
 
 bool Process::isFinished() const

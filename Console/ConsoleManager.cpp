@@ -3,7 +3,7 @@
 
 #include "ConsoleManager.h"
 #include "MainConsole.h"
-
+using namespace std;
 
 ConsoleManager* ConsoleManager::sharedInstance = nullptr;				// Initialize the instance of ConsoleManager
 
@@ -153,19 +153,5 @@ int ConsoleManager::getTotalScreens() const
 	}
 	else {
 		return consoleTable.size() - 1;
-	}
-}
-
-void ConsoleManager::PollKeyboardInput(IKeyboardEvent& keyboardEvent)
-{
-	if (_kbhit()) {
-		char key = _getch();
-
-		if (GetAsyncKeyState(key) & 0x8000) {
-			keyboardEvent.onKeyDown(key);
-		}
-		else {
-			keyboardEvent.onKeyUp(key);
-		}
 	}
 }

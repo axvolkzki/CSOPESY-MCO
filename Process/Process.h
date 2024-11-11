@@ -2,11 +2,9 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <mutex>
 #include "../Command/ICommand.h"
 #include "../TypedefRepo.h"
-
-#include <ctime>
-#include <cstdint>
 
 
 class Process {
@@ -30,6 +28,8 @@ public:
 	void executeCurrentCommand() const;
 	void moveToNextLine();
 
+	void updateState(const ProcessState newState);
+
 	bool isFinished() const;
 	int getRemainingTime() const;
 	int getCommandCounter() const;
@@ -42,6 +42,8 @@ public:
 	// void test_generateRandomCommands(int limit);
 	void generateRandomCommands();
 
+	//void updateState();
+
 private:
 	int pid;
 	String name;
@@ -52,6 +54,8 @@ private:
 	int cpuCoreID = -1;
 	RequirementFlags requirementFlags;
 	ProcessState currentState;
+
+	std::mutex processMutex;
 
 	friend class ResourceEmulator;
 };

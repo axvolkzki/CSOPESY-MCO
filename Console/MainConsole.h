@@ -16,7 +16,7 @@ public:
 	void display() override;
 	void process() override;
 
-	bool getIsSchedulerStop();		// Returns the flag to stop the scheduler
+	bool getIsSchedulerStop() const;		// Returns the flag to stop the scheduler
 
 private:
 	void ASCIITextHeader() const;						// Prints the ASCII text header

@@ -14,7 +14,7 @@ public:
 	~IETThread() = default;
 
 	void start();	// schedules thread execution
-	static void sleep(int ms);
+	static void sleep(int ms); // sleeps the current thread for a given time in milliseconds
 
 protected:
 	virtual void run() = 0;	// must be implemented by derived class

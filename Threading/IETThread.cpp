@@ -1,13 +1,5 @@
 #include "IETThread.h"
 
-//IEThread::IEThread()
-//{
-//}
-//
-//IEThread::~IEThread()
-//{
-//}
-
 void IETThread::start() {
 	std::thread(&IETThread::run, this).detach(); // detach thread for indpendent execution. without this, join() function must be called
 }

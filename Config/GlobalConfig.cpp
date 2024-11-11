@@ -7,6 +7,8 @@
 #include <iomanip> // For quoted string parsing
 #include <random>
 
+GlobalConfig* GlobalConfig::sharedInstance = nullptr;
+
 GlobalConfig::GlobalConfig() {
 	config.num_cpu = 0;
 	config.scheduler = "";
@@ -21,41 +23,23 @@ GlobalConfig::GlobalConfig() {
 }
 
 
-void GlobalConfig::initialize() {
-	// Load the configuration file
-    String config_file = "config.txt";
-
-    if (loadConfigFile(config_file)) {
-        std::cout << "Config file loaded successfully.\n" << std::endl;
-    } else {
-        std::cout << "Failed to load config file.\n" << std::endl;
-    }
+void GlobalConfig::initialize()
+{
+	if (sharedInstance == nullptr) {
+		sharedInstance = new GlobalConfig();
+	}
 }
 
-/*
-void GlobalConfig::initialize() {
-    // Load the configuration file
-    String config_file = "config.txt";
-
-    if (loadConfigFile(config_file)) {
-        std::cout << "Config file loaded successfully.\n" << std::endl;
-        // Optionally validate the loaded configuration
-        if (!validateConfig()) {
-            std::cout << "Warning: Configuration validation failed. Using default values.\n" << std::endl;
-            setDefaultConfigValues(); // Set default values if validation fails
-        }
-    } else {
-        std::cout << "Failed to load config file. Using default values.\n" << std::endl;
-        setDefaultConfigValues(); // Set default values if loading fails
-    }
+void GlobalConfig::destroy()
+{
+	if (sharedInstance != nullptr) {
+		delete sharedInstance;
+		sharedInstance = nullptr;
+	}
 }
-*/
 
-
-bool GlobalConfig::loadConfigFile(String& filename) {
+void GlobalConfig::loadConfigFile(String& filename) {
 	bool isLoaded = false;
-
-
 
 	try {
 		std::ifstream file(filename);
@@ -80,8 +64,6 @@ bool GlobalConfig::loadConfigFile(String& filename) {
 		std::cerr << e.what() << std::endl;
 		isLoaded = false;
 	}
-
-	return isLoaded;
 }
 
 

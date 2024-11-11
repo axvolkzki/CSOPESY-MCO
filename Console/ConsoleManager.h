@@ -7,7 +7,6 @@
 #include "../Console/AConsole.h"
 #include "../TypedefRepo.h"										// Contains typedefs for std::string and std::vector<std::string>
 #include "../Screen/BaseScreen.h"
-#include "../Event/IKeyboardEvent.h"
 
 
 // Major Screens
@@ -41,7 +40,6 @@ public:
 	bool isScreenRegistered(String screenName) const;								// Checks if the specified screen is registered
 
 	int getTotalScreens() const;													// Returns the total number of screens
-	void PollKeyboardInput(IKeyboardEvent& keyboardEvent);							// Polls the keyboard input
 
 private:
 	ConsoleManager();																// Constructor

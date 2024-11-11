@@ -6,20 +6,16 @@
 class GlobalConfig
 {
 public:
-	// Deleted copy constructor and assignment operator to prevent copying
-    GlobalConfig(const GlobalConfig&) = delete;
-    GlobalConfig& operator=(const GlobalConfig&) = delete;
-
-	GlobalConfig();						// Constructor
-	~GlobalConfig() = default;
-
-	static GlobalConfig& getInstance() {
-		static GlobalConfig instance;
-		return instance;
+	static GlobalConfig* getInstance() {
+		if (sharedInstance == nullptr) {
+			sharedInstance = new GlobalConfig();
+		}
+		return sharedInstance;
 	}
 
-	void initialize();
-	bool loadConfigFile(String& filename);				// Loads the config file
+	static void initialize();
+	static void destroy();
+	void loadConfigFile(String& filename);				// Loads the config file
 	void printConfig() const;							// Prints the config
 	int getRandomInstructionCount() const;				// Returns a random instruction count
 
@@ -36,6 +32,9 @@ public:
 	uint32_t getMemPerProcess() const;					// Returns the memory per process
 
 private:
+	GlobalConfig();
+	static GlobalConfig* sharedInstance;
+
 	struct Config {							// Struct variable to hold the values of the config.txt
 		uint16_t num_cpu;					// Number of CPUs: [1, 128]
 		String scheduler;					// or enum SchedulerType { FCFS, RR };
