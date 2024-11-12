@@ -2,14 +2,14 @@
 #include <algorithm> // for transform() - converting string to lowercase
 #include <cstdint>
 #include <Windows.h>
+#include <conio.h>
 
 #include "MainConsole.h"
 #include "../TypedefRepo.h"
 #include "../Console/ConsoleManager.h"
 #include "../Config/GlobalConfig.h"
 #include "../Process/Process.h"
-#include "../Scheduler/SchedulerManager.h"
-#include <conio.h>
+
 
 
 // Constructor: Set the name of the console when MainConsole is instantiated
@@ -112,16 +112,16 @@ void MainConsole::process() {
 				int quantum = GlobalConfig::getInstance()->getQuantumCycles();						// Get the quantum cycles
 				Process::RequirementFlags processReqFlags = { true, 1, true, 1 };					// Set the requirement flags
 
-				std::shared_ptr<Process> newProcess = SchedulerManager::getInstance()->createUniqueProcess(processName, processID);
-				std::shared_ptr<BaseScreen> newScreen = std::make_shared<BaseScreen>(newProcess, newProcess->getName());
+				//std::shared_ptr<Process> newProcess = SchedulerManager::getInstance()->createUniqueProcess(processName, processID);
+				//std::shared_ptr<BaseScreen> newScreen = std::make_shared<BaseScreen>(newProcess, newProcess->getName());
 
-				// Register the new screen and switch to it
-				ConsoleManager::getInstance()->registerScreen(newScreen);					// Register the new screen
-				ConsoleManager::getInstance()->switchToScreen(processName);					// Switch to the new screen
-				
-				// Process and draw the new screen
-				ConsoleManager::getInstance()->process();									// Process the new screen
-				ConsoleManager::getInstance()->drawConsole();								// Draw the new screen
+				//// Register the new screen and switch to it
+				//ConsoleManager::getInstance()->registerScreen(newScreen);					// Register the new screen
+				//ConsoleManager::getInstance()->switchToScreen(processName);					// Switch to the new screen
+				//
+				//// Process and draw the new screen
+				//ConsoleManager::getInstance()->process();									// Process the new screen
+				//ConsoleManager::getInstance()->drawConsole();								// Draw the new screen
 			}
 			else if (commandMain.substr(0, 9) == "screen -r") {
 				ConsoleManager::getInstance()->exitApplication();							// Stop the main console process
@@ -132,7 +132,7 @@ void MainConsole::process() {
 				ConsoleManager::getInstance()->drawConsole();								// Draw the previous screen
 			}
 			else if (commandMain == "screen -ls") {
-				std::unordered_map<String, std::shared_ptr<Process>> allProcesses = SchedulerManager::getInstance()->getAllProcesses();
+				
 
 				std::cout << "CPU utilization: " << std::endl;			// TODO: Missing implementation
 				std::cout << "Cores used: " << std::endl;				// TODO: Missing implementation
@@ -142,21 +142,11 @@ void MainConsole::process() {
 				std::cout << "______________________________________________________________\n";
 				// Print running processes
 				std::cout << "Running Processes:\n";
-				for (const auto& entry : allProcesses) {
-					auto process = entry.second;
-					if (process->getState() == Process::RUNNING) {  // Assuming RUNNING is the running state
-						std::cout << " - " << process->getName() << " (ID: " << process->getPID() << ")\n";
-					}
-				}
+
 
 				// Print finished processes
 				std::cout << "\nFinished Processes:\n";
-				for (const auto& entry : allProcesses) {
-					auto process = entry.second;
-					if (process->getState() == Process::FINISHED) {  // Assuming FINISHED is the finished state
-						std::cout << " - " << process->getName() << " (ID: " << process->getPID() << ")\n";
-					}
-				}
+
 
 				std::cout << "______________________________________________________________\n";
 
@@ -183,14 +173,9 @@ void MainConsole::process() {
 
 
 					if (cpuCycleCounter % batchProcessFreq == 0) {
-						int processID = ++processCounter;
-						String processName = "Process" + std::to_string(processID);
-						std::shared_ptr<Process> newProcess = SchedulerManager::getInstance()->createUniqueProcess(processName, processID);
-						std::shared_ptr<BaseScreen> newScreen = std::make_shared<BaseScreen>(newProcess, newProcess->getName());
-						ConsoleManager::getInstance()->registerScreen(newScreen);
+						
 					}
 					cpuCycleCounter++;
-					SchedulerManager::getInstance()->tick();
 				}
 			}
 			else if (commandMain == "scheduler-stop") {

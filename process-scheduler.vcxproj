@@ -128,48 +128,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Scheduler\SchedulerManager.cpp" />
-    <ClCompile Include="Scheduler\AScheduler.cpp" />
     <ClCompile Include="Memory\MemoryManager.cpp" />
-    <ClCompile Include="Scheduler\DebugScheduler.cpp" />
     <ClCompile Include="Memory\MemoryTestRun.cpp" />
     <ClCompile Include="Memory\FlatMemoryAllocator.cpp" />
     <ClCompile Include="Console\MessageBuffer.cpp" />
-    <ClCompile Include="Scheduler\ResourceEmulator.cpp" />
-    <ClCompile Include="Scheduler\FCFSScheduler.cpp" />
     <ClCompile Include="Console\AConsole.cpp" />
     <ClCompile Include="Command\ICommand.cpp" />
     <ClCompile Include="Command\PrintCommand.cpp" />
-    <ClCompile Include="Scheduler\RRScheduler.cpp" />
-    <ClCompile Include="Threading\SchedulerWorker.cpp" />
     <ClCompile Include="Screen\BaseScreen.cpp" />
     <ClCompile Include="Console\ConsoleManager.cpp" />
     <ClCompile Include="Config\GlobalConfig.cpp" />
-    <ClCompile Include="Threading\IETThread.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Console\MainConsole.cpp" />
     <ClCompile Include="Process\Process.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Memory\MemoryManager.h" />
-    <ClInclude Include="Scheduler\SchedulerManager.h" />
-    <ClInclude Include="Scheduler\DebugScheduler.h" />
     <ClInclude Include="Memory\MemoryTestRun.h" />
     <ClInclude Include="Memory\FlatMemoryAllocator.h" />
     <ClInclude Include="Memory\IMemoryAllocator.h" />
     <ClInclude Include="Console\MessageBuffer.h" />
-    <ClInclude Include="Scheduler\ResourceEmulator.h" />
-    <ClInclude Include="Scheduler\RRScheduler.h" />
-    <ClInclude Include="Scheduler\FCFSScheduler.h" />
-    <ClInclude Include="Scheduler\AScheduler.h" />
     <ClInclude Include="Console\AConsole.h" />
     <ClInclude Include="Command\ICommand.h" />
     <ClInclude Include="Command\PrintCommand.h" />
-    <ClInclude Include="Threading\SchedulerWorker.h" />
     <ClInclude Include="Screen\BaseScreen.h" />
     <ClInclude Include="Console\ConsoleManager.h" />
     <ClInclude Include="Config\GlobalConfig.h" />
-    <ClInclude Include="Threading\IETThread.h" />
     <ClInclude Include="Console\MainConsole.h" />
     <ClInclude Include="Process\Process.h" />
     <ClInclude Include="TypedefRepo.h" />

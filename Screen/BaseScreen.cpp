@@ -5,7 +5,6 @@
 #include "../TypedefRepo.h"
 #include "../Process/Process.h"
 #include "../Console/ConsoleManager.h"
-#include "../Threading/SchedulerWorker.h"
 
 
 
