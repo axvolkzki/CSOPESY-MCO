@@ -38,19 +38,6 @@ void BaseScreen::display()
 void BaseScreen::process() {
     String commandBaseScreen;
 
-    // Start SchedulerWorker for this screen's process
-    SchedulerWorker schedulerWorker;
-    schedulerWorker.update(true);
-    std::thread schedulerThread(&SchedulerWorker::run, &schedulerWorker);
-
-    // Check if the thread was created successfully
-    if (!schedulerThread.joinable()) {
-        std::cerr << "Error: Failed to create thread." << std::endl;
-        return;
-    }
-
-    schedulerThread.detach();  // Detach thread to run independently
-
     // Command input loop for user with periodic refresh for updates
     bool running = true;
     while (running) {
@@ -61,8 +48,6 @@ void BaseScreen::process() {
         std::getline(std::cin, commandBaseScreen);
 
         if (commandBaseScreen == "exit") {
-            schedulerWorker.update(false);  // Signal scheduler to stop
-            schedulerThread.join();         // Wait for scheduler to finish
             ConsoleManager::getInstance()->switchConsole(MAIN_CONSOLE);
             running = false;                // Stop the loop
         }

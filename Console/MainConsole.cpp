@@ -53,6 +53,8 @@ void MainConsole::process() {
 					std::cout << "Initializing the program...\n" << std::endl;
 					
 					GlobalConfig::getInstance()->printConfig();	// Load the configuration file
+					std::cout << " " << std::endl;
+					
 					isFirstCommand = false;
 					
 					continue;
