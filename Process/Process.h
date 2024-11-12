@@ -28,8 +28,6 @@ public:
 	void executeCurrentCommand() const;
 	void moveToNextLine();
 
-	void updateState(const ProcessState newState);
-
 	bool isFinished() const;
 	int getRemainingTime() const;
 	int getCommandCounter() const;
@@ -39,10 +37,10 @@ public:
 	ProcessState getState() const;
 	String getName() const;
 
-	// void test_generateRandomCommands(int limit);
-	void generateRandomCommands();
+	void setCPUCoreID(int coreID);
+	void setState(ProcessState state);
 
-	//void updateState();
+	void generateRandomCommands();
 
 private:
 	int pid;

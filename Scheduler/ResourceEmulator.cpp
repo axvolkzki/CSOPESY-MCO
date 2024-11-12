@@ -44,3 +44,8 @@ void ResourceEmulator::destroy()
 		instance = nullptr;
 	}
 }
+
+std::vector<std::shared_ptr<SchedulerWorker>> ResourceEmulator::getCPUCores() const
+{
+	return cpuCores;
+}

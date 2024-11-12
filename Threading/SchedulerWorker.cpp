@@ -11,7 +11,6 @@ void SchedulerWorker::run()
 {
 	while (this->isRunning)
 	{
-		SchedulerManager::getInstance()->tick();		// Checks the ready que and runs/assigned the next process
-		//std::cout << "Tick called.\n";	// Debugging
+		SchedulerManager::getInstance()->tick(); // assign a process to the CPU core
 	}
 }

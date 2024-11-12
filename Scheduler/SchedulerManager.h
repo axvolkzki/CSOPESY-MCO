@@ -17,7 +17,6 @@ public:
 	void tick();												// Tick the scheduler manager; called by SchedulerWorker
 
 	std::shared_ptr<Process> createUniqueProcess(String name, int id);		// Create add a new process
-	std::unordered_map<String, std::shared_ptr<Process>> getAllProcesses() const;
 	//std::vector<std::shared_ptr<Process>> getAllProcesses() const;
 
 private:

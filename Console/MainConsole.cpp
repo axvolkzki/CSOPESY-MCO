@@ -132,7 +132,6 @@ void MainConsole::process() {
 				ConsoleManager::getInstance()->drawConsole();								// Draw the previous screen
 			}
 			else if (commandMain == "screen -ls") {
-				std::unordered_map<String, std::shared_ptr<Process>> allProcesses = SchedulerManager::getInstance()->getAllProcesses();
 
 				std::cout << "CPU utilization: " << std::endl;			// TODO: Missing implementation
 				std::cout << "Cores used: " << std::endl;				// TODO: Missing implementation
@@ -142,21 +141,11 @@ void MainConsole::process() {
 				std::cout << "______________________________________________________________\n";
 				// Print running processes
 				std::cout << "Running Processes:\n";
-				for (const auto& entry : allProcesses) {
-					auto process = entry.second;
-					if (process->getState() == Process::RUNNING) {  // Assuming RUNNING is the running state
-						std::cout << " - " << process->getName() << " (ID: " << process->getPID() << ")\n";
-					}
-				}
+				
 
 				// Print finished processes
 				std::cout << "\nFinished Processes:\n";
-				for (const auto& entry : allProcesses) {
-					auto process = entry.second;
-					if (process->getState() == Process::FINISHED) {  // Assuming FINISHED is the finished state
-						std::cout << " - " << process->getName() << " (ID: " << process->getPID() << ")\n";
-					}
-				}
+				
 
 				std::cout << "______________________________________________________________\n";
 

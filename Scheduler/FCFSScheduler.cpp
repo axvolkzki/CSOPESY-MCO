@@ -2,42 +2,65 @@
 
 void FCFSScheduler::init()
 {
-	// Initialize any necessary data for FCFS (e.g., process queue)
-	processQueue = std::queue<std::shared_ptr<Process>>();
+    // Initialization logic, if any, specific to FCFS
+    isRunning = true;
 
-	// Initialize process map
-	processMap = std::unordered_map<String, std::shared_ptr<Process>>();
-}
+    for (const auto& process : processes) {
+        int core = 0;
 
-void FCFSScheduler::execute() {
-    // If there are processes in the queue, run the first one
-    if (!processQueue.empty()) {
-        std::shared_ptr<Process> currentProcess = processQueue.front();
-        processQueue.pop();
-
-        // Execute the process (for simplicity, let's assume it's a function like "run")
-        std::cout << "Executing process: " << currentProcess->getName() << std::endl;
-        currentProcess->updateState(Process::RUNNING);  // Set state to RUNNING
-        currentProcess->executeCurrentCommand();
-        currentProcess->moveToNextLine();
-
-        // Check if the process is finished
-        if (currentProcess->isFinished()) {
-            currentProcess->updateState(Process::FINISHED);  // Set state to FINISHED
+        if (core >= 0 && core < GlobalConfig::getInstance()->getNumCPU()) {
+            processQueue[core].push_back(process);
         }
         else {
-            // If process is not finished, it should remain in the queue
-            processQueue.push(currentProcess);  // Re-queue it to continue execution
+            std::cerr << "Invalid core!" << std::endl;
         }
     }
 }
 
 
-void FCFSScheduler::addProcess(std::shared_ptr<Process> process)
-{
-    // FCFS simply adds processes to the queue in the order they arrive
-    processQueue.push(process);
+void FCFSScheduler::execute() {
+	std::cout << "Executing FCFS scheduling algorithm" << std::endl;
 
-	// Add process to the process map
-	processMap[process->getName()] = process;
+    if (!isRunning || readyQueue.empty()) return;
+
+    // Get the next process in the ready queue
+    auto process = readyQueue.front();
+    readyQueue.pop();  // Remove the process from the queue
+
+    // Assign this process to a CPU core and start execution
+    assignToAvailableCore(process);
+}
+
+bool FCFSScheduler::assignToAvailableCore(const std::shared_ptr<Process>& process) {
+    auto* resourceEmulator = ResourceEmulator::getInstance();
+
+    // Iterate over cpuCores to find an available (free) core
+    for (size_t coreIndex = 0; coreIndex < resourceEmulator->getCPUCores().size(); ++coreIndex) {
+        if (isCoreFree(coreIndex)) {
+            // Assign process to this core
+            coreProcessMap[coreIndex] = process;
+			process->setCPUCoreID(coreIndex);
+			process->setState(Process::RUNNING);
+
+            // Start the process on this core's thread
+            resourceEmulator->getCPUCores()[coreIndex]->run();
+            return true;  // Process assigned successfully
+        }
+    }
+    return false;  // No available core found
+}
+
+bool FCFSScheduler::isCoreFree(int coreIndex) {
+    // Check if the core is currently unassigned or its assigned process has finished
+    if (coreProcessMap[coreIndex] == nullptr) {
+        return true;  // Core is free if no process is assigned
+    }
+    auto process = coreProcessMap[coreIndex];
+    if (process->isFinished()) {
+        // Reset core status and return true if the process on it has finished
+        coreProcessMap[coreIndex] = nullptr;
+        process->setState(Process::RUNNING);
+        return true;
+    }
+    return false;
 }

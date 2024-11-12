@@ -18,6 +18,8 @@ public:
 	static void stopAllCPUs();			// Stop all CPUs (SchedulerWorker threads)
 	static void destroy();				// Destroy the resource emulator; cleans ip resources
 
+	std::vector<std::shared_ptr<SchedulerWorker>> getCPUCores() const;	// Get a list of CPU cores (SchedulerWorkers)
+
 private:
 	std::vector<std::shared_ptr<SchedulerWorker>> cpuCores;	// a list of CPU cores (SchedulerWorkers)
 	static ResourceEmulator* instance;						// Singleton instance

@@ -12,30 +12,7 @@ void RRScheduler::init()
 }
 
 void RRScheduler::execute() {
-    if (currentProcess != nullptr) {
-        // If current process still has time, continue executing
-        currentProcess->updateState(Process::RUNNING);  // Set state to RUNNING
-        currentProcess->executeCurrentCommand();
-        currentProcess->moveToNextLine();
-
-        // Check if process is finished after executing current command
-        if (currentProcess->isFinished()) {
-            currentProcess->updateState(Process::FINISHED);  // Set state to FINISHED
-            std::cout << "Process " << currentProcess->getName() << " finished." << std::endl;
-            currentProcess = nullptr;  // Reset current process
-        }
-        else {
-            // If not finished, continue to next round
-            processQueue.push(currentProcess);  // Re-queue the process
-        }
-    }
-
-    // If there's no current process, pick the next one from the queue
-    if (currentProcess == nullptr && !processQueue.empty()) {
-        currentProcess = processQueue.front();
-        processQueue.pop();
-        std::cout << "Switching to process: " << currentProcess->getName() << std::endl;
-    }
+	std::cout << "Executing RR scheduling algorithm" << std::endl;
 }
 
 

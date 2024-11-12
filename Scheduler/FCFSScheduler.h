@@ -1,25 +1,22 @@
 #pragma once
 #include "AScheduler.h"
-#include <queue>
+#include "ResourceEmulator.h"
 
 class FCFSScheduler : public AScheduler
 {
 public:
-	FCFSScheduler() : AScheduler(fcfs, 0, "") {}
+	FCFSScheduler(int pid, String processName) : AScheduler(SchedulingAlgorithm::fcfs, pid, processName) {}
 
     void init() override;  // Initialize FCFS specific settings
     void execute() override;  // Execute FCFS scheduling logic
 
-	void addProcess(std::shared_ptr<Process> process);  // Adds a process to the queue
-
-	//get process map
-	std::unordered_map<String, std::shared_ptr<Process>> getProcessMap() const { return processMap; }
-
-	
 private:
-	std::queue<std::shared_ptr<Process>> processQueue;  // Queue to store processes
+	// Map to track which process is assigned to each core (index in cpuCores)
+	std::unordered_map<int, std::shared_ptr<Process>> coreProcessMap;
+	std::vector<std::vector<Process>> processQueue; // One queue for each core
 
-	// Process map
-	std::unordered_map<String, std::shared_ptr<Process>> processMap;
+	bool assignToAvailableCore(const std::shared_ptr<Process>& process);
+
+	bool isCoreFree(int coreIndex);
 };
 

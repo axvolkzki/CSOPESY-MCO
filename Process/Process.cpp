@@ -73,6 +73,9 @@ void Process::generateRandomCommands()
 //	}
 //}
 
+/**
+* This is called by CPU core worker threads to execute the current command in the process. 
+*/
 void Process::executeCurrentCommand() const
 {
 	if (commandCounter < commandList.size()) {
@@ -96,11 +99,6 @@ void Process::moveToNextLine()
 		std::cout << "All commands executed, cannot move to next line." << std::endl;
 	}
 
-}
-
-void Process::updateState(const ProcessState newState) {
-	std::lock_guard<std::mutex> lock(processMutex);
-	this->currentState = newState;
 }
 
 bool Process::isFinished() const
@@ -141,4 +139,14 @@ Process::ProcessState Process::getState() const
 String Process::getName() const
 {
 	return this->name;
+}
+
+void Process::setCPUCoreID(int coreID)
+{
+	this->cpuCoreID = coreID;
+}
+
+void Process::setState(ProcessState state)
+{
+	this->currentState = state;
 }
