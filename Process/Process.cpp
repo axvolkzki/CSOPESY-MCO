@@ -1,14 +1,5 @@
-#include <ctime>
-#include <sstream>
 #include <iostream>
-#include <iomanip>
-#include <limits>
 #include <random>
-#include <chrono> // Include chrono for timestamp
-#include <thread>
-#include <memory>
-#include <vector>
-
 #include "Process.h"
 #include "../TypedefRepo.h"
 #include "../Console/MainConsole.h"
@@ -16,129 +7,83 @@
 #include "../Command/ICommand.h"
 #include "../Command/PrintCommand.h"
 
-
 Process::Process(int pid, String name, RequirementFlags requirementFlags)
-	: pid(pid), name(name), requirementFlags(requirementFlags), currentState(READY), commandCounter(0)
-{
+    : pid(pid), name(name), requirementFlags(requirementFlags), currentState(READY), commandCounter(0) {
 }
 
-void Process::addCommand(ICommand::CommandType commandType)
-{
-
-	if (commandType == ICommand::IO) {
-		// TODO: Implement I/O command handling
-
-	}
-	 else if (commandType == ICommand::PRINT) {
-	 	String toPrint = "Hello, World!";
-	 	const std::shared_ptr<ICommand> print = std::make_shared<PrintCommand>(this->pid, toPrint);
-	 	this->commandList.push_back(print);
-	 }
-	//else if (commandType == ICommand::PRINT) {
-	//	String toPrint = "Random message " + std::to_string(i); // Varying messages
-	//	const std::shared_ptr<ICommand> print = std::make_shared<PrintCommand>(this->pid, toPrint);
-	//	this->commandList.push_back(print);
-	//}
+void Process::addCommand(ICommand::CommandType commandType) {
+    if (commandType == ICommand::PRINT) {
+        String toPrint = "Executing command for PID " + std::to_string(this->pid);
+        auto printCommand = std::make_shared<PrintCommand>(this->pid, toPrint);
+        this->commandList.push_back(printCommand);
+    } else if (commandType == ICommand::IO) {
+        // Placeholder for future I/O command handling, if needed.
+    }
 }
 
-// void Process::test_generateRandomCommands(int limit)
-void Process::generateRandomCommands()
-{
-	int limit = GlobalConfig::getInstance()->getRandomInstructionCount();
-
-	for (int i = 0; i < limit; i++) {
-		addCommand(ICommand::PRINT);
-	}
-	
-
-
-	//int limit = GlobalConfig::getInstance()->getRandomInstructionCount();
-	//std::random_device rd;
-	//std::mt19937 gen(rd());
-	//std::uniform_int_distribution<> dis(0, 1);  // Assuming 0: PRINT, 1: IO (you can extend this)
-
-	//for (int i = 0; i < limit; i++) {
-	//	auto commandType = static_cast<ICommand::CommandType>(dis(gen));
-	//	addCommand(commandType);
-	//}
+void Process::generateRandomCommands() {
+    int limit = GlobalConfig::getInstance()->getRandomInstructionCount();
+    for (int i = 0; i < limit; i++) {
+        addCommand(ICommand::PRINT);  // Adds PRINT commands based on configured instruction count.
+    }
 }
 
-//void Process::updateState()
-//{
-//	if (this->getRemainingTime() < this->getLinesOfCode()) {
-//		this->currentState(RUNNING);
-//	}
-//	else {
-//
-//	}
-//}
-
-void Process::executeCurrentCommand() const
-{
-	if (commandCounter < commandList.size()) {
-		commandList[commandCounter]->execute(); // Executes the command
-		std::cout << "Executing command at index " << commandCounter << std::endl; // Debug output
-	}
-	else {
-		std::cerr << "No command to execute at index " << commandCounter << std::endl;
-	}
+void Process::executeCurrentCommand() {
+    std::lock_guard<std::mutex> lock(processMutex);
+    if (commandCounter < commandList.size()) {
+        commandList[commandCounter]->execute();  // Execute the command at the current counter.
+        std::cout << "Process " << pid << " executed command at line " << commandCounter << std::endl;
+        commandCounter++;
+    } else {
+        std::cerr << "Process " << pid << " has no more commands to execute." << std::endl;
+        updateState(FINISHED);  // Mark as finished if all commands are executed.
+    }
 }
 
-void Process::moveToNextLine()
-{
-	std::lock_guard<std::mutex> lock(processMutex);
-
-	if (commandCounter < commandList.size()) {
-		this->commandCounter++;
-		std::cout << "Moved to next command, counter: " << commandCounter << std::endl; // Debug output
-	}
-	else {
-		std::cout << "All commands executed, cannot move to next line." << std::endl;
-	}
-
+void Process::moveToNextLine() {
+    std::lock_guard<std::mutex> lock(processMutex);
+    if (commandCounter >= commandList.size()) {
+        updateState(FINISHED);  // Update state if all commands are completed.
+    } else {
+        currentState = RUNNING;  // Continue running if there are commands left.
+    }
 }
 
 void Process::updateState(const ProcessState newState) {
-	std::lock_guard<std::mutex> lock(processMutex);
-	this->currentState = newState;
+    std::lock_guard<std::mutex> lock(processMutex);
+    currentState = newState;
 }
 
-bool Process::isFinished() const
-{
-	return this->commandCounter == this->commandList.size();
+bool Process::isFinished() const {
+    return currentState == FINISHED;
 }
 
-int Process::getRemainingTime() const
-{
-	return this->commandList.size() - this->commandCounter;
+int Process::getRemainingTime() const {
+    std::lock_guard<std::mutex> lock(processMutex);
+    return commandList.size() - commandCounter;
 }
 
-int Process::getCommandCounter() const
-{
-	return this->commandCounter;
+int Process::getCommandCounter() const {
+    return commandCounter;
 }
 
-int Process::getLinesOfCode() const
-{
-	return this->commandList.size();
+int Process::getLinesOfCode() const {
+    return commandList.size();
 }
 
-int Process::getPID() const
-{
-	return this->pid;
+int Process::getPID() const {
+    return pid;
 }
 
-int Process::getCPUCoreID() const
-{
-	return this->cpuCoreID;
+int Process::getCPUCoreID() const {
+    return cpuCoreID;
 }
 
-Process::ProcessState Process::getState() const
-{
-	return this->currentState;
+Process::ProcessState Process::getState() const {
+    std::lock_guard<std::mutex> lock(processMutex);
+    return currentState;
 }
 
-String Process::getName() const
-{
-	return this->name;
+String Process::getName() const {
+    return name;
 }

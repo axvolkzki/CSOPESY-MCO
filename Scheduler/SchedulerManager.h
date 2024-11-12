@@ -6,34 +6,27 @@
 #include <memory>
 #include <mutex>
 
-
-class SchedulerManager
-{
+class SchedulerManager {
 public:
-	static SchedulerManager* getInstance();						// Singleton instance
-	static void initialize();									// Initialize the scheduler manager	
-	static void destroy();										// Destroy the scheduler manager
+    static SchedulerManager* getInstance();  
+    static void initialize();  
+    static void destroy();  
 
-	void tick();												// Tick the scheduler manager; called by SchedulerWorker
+    void tick();  
 
-	std::shared_ptr<Process> createUniqueProcess(String name, int id);		// Create add a new process
-	std::unordered_map<String, std::shared_ptr<Process>> getAllProcesses() const;
-	//std::vector<std::shared_ptr<Process>> getAllProcesses() const;
+    std::shared_ptr<Process> createUniqueProcess(String name, int id);  
+    std::unordered_map<String, std::shared_ptr<Process>> getAllProcesses() const;
 
 private:
-	SchedulerManager();											// Constructor
-	~SchedulerManager() = default;								// Default destructor
+    SchedulerManager();  
+    ~SchedulerManager() = default;
 
-	SchedulerManager(SchedulerManager const&) {};				// Copy constructor
-	SchedulerManager& operator=(SchedulerManager const&) {
-		return *this;
-	};															// Assignment operator
-	static SchedulerManager* sharedInstance;					// Singleton instance
-	
-	std::shared_ptr<AScheduler> scheduler;						// Pointer to the scheduler
-	std::mutex schedulerMutex;									// Scheduler mutex; for thread safety
+    SchedulerManager(SchedulerManager const&) {};  
+    SchedulerManager& operator=(SchedulerManager const&) { return *this; };  
+    static SchedulerManager* sharedInstance;  
 
-	std::shared_ptr<Process> findProcess(String processName);	// Find a process by name
-	String generateUniqueProcessName(int id);					// Generate a unique process name
+    std::shared_ptr<AScheduler> scheduler;  
+    std::mutex schedulerMutex;  
+    std::shared_ptr<Process> findProcess(String processName);
+    String generateUniqueProcessName(int id);
 };
-
